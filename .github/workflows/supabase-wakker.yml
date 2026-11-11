@@ -1,0 +1,27 @@
+# Houdt het gratis Supabase-project wakker: Supabase pauzeert een gratis project na 7 dagen
+# zonder databaseverkeer. Elke dag één kleine databasevraag (is_bekend geeft anoniem 'false').
+name: Supabase wakker houden
+
+on:
+  schedule:
+    - cron: '17 6 * * *'   # elke dag 06:17 UTC
+  workflow_dispatch:        # ook met de hand te starten (Actions → Run workflow)
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Database aanroepen
+        env:
+          URL: ${{ secrets.VITE_SUPABASE_URL }}
+          KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST -d '{}' \
+            -H "Content-Type: application/json" \
+            -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
+            "$URL/rest/v1/rpc/is_bekend")
+          echo "Antwoord van Supabase: $code"
+          test "$code" = "200"
