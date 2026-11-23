@@ -332,10 +332,10 @@ function Docenten({ d, laad, zelf }) {
             <div>
               <strong>{x.naam}</strong> {x.weergavenaam && <span className="zacht">({x.weergavenaam})</span>} {x.is_admin && <span className="label">beheerder</span>}
               {x.toegang === false && !x.is_admin && <span className="label open">geen toegang</span>}
-              <div className="zacht klein">{x.email}{klassenVan(x.id).length ? ` · mentor ${klassenVan(x.id).join(', ')}` : ''}</div>
+              <div className="zacht klein">{x.email}{klassenVan(x.id).length ? ` · mentor ${klassenVan(x.id).join(', ')}` : ''}
+                {!x.is_admin && heeftWw(x) && <span className="label ww-label">wachtwoord</span>}</div>
             </div>
             <div className="rij-acties">
-              {!x.is_admin && heeftWw(x) && <span className="zacht klein">heeft wachtwoord</span>}
               {!x.is_admin && heeftWw(x) && <button className="link" disabled={bezig} onClick={() => wisWachtwoord(x)}>Wachtwoord wissen</button>}
               {!x.is_admin && !x.sso && (
                 <button className="link" disabled={bezig} onClick={() => maakWachtwoorden([x])}
