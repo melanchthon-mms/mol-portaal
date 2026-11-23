@@ -250,6 +250,16 @@ function Docenten({ d, laad, zelf }) {
     }, `SSO ${aan ? 'aan' : 'uit'} voor ${ids.length} docent${ids.length === 1 ? '' : 'en'}.`)
   }
 
+  // Toegang uit = docent kan op geen enkele manier inloggen (zie supabase/docent-toegang.sql); wachtwoord blijft bewaard
+  async function zetToegang(x, aan) {
+    if (!aan && !await bevestig(`${x.naam} kan dan niet meer inloggen (ook niet met Microsoft). Het wachtwoord blijft bewaard; zet het vinkje weer aan om toegang terug te geven.`, { knop: 'Toegang uitzetten' })) return
+    await voer(async () => {
+      const { error } = await supabase.from('docenten').update({ toegang: aan }).eq('id', x.id)
+      if (error) throw error
+      await laad()
+    }, `${x.naam} heeft ${aan ? 'weer' : 'geen'} toegang.`)
+  }
+
   function printCodes() {
     document.body.classList.add('print-codes')
     window.print()
@@ -311,6 +321,7 @@ function Docenten({ d, laad, zelf }) {
           <li key={x.id}>
             <div>
               <strong>{x.naam}</strong> {x.weergavenaam && <span className="zacht">({x.weergavenaam})</span>} {x.is_admin && <span className="label">beheerder</span>}
+              {x.toegang === false && !x.is_admin && <span className="label open">geen toegang</span>}
               <div className="zacht klein">{x.email}{klassenVan(x.id).length ? ` · mentor ${klassenVan(x.id).join(', ')}` : ''}</div>
             </div>
             <div className="rij-acties">
@@ -324,6 +335,11 @@ function Docenten({ d, laad, zelf }) {
               {!x.is_admin && (
                 <label className="sso-vink" title="Aan = alleen inloggen met Microsoft; het wachtwoord werkt niet meer">
                   <input type="checkbox" checked={!!x.sso} disabled={bezig} onChange={(e) => zetSso([x.id], e.target.checked)} /> SSO
+                </label>
+              )}
+              {!x.is_admin && (
+                <label className="sso-vink" title="Uit = kan op geen enkele manier inloggen; het wachtwoord blijft bewaard">
+                  <input type="checkbox" checked={x.toegang !== false} disabled={bezig} onChange={(e) => zetToegang(x, e.target.checked)} /> Toegang
                 </label>
               )}
               <button className="link" onClick={() => setBewerk({ id: x.id, naam: x.naam, email: x.email, weergavenaam: x.weergavenaam || '' })}>Wijzigen</button>

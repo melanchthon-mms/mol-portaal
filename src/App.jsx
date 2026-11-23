@@ -73,7 +73,7 @@ export default function App() {
               <p>Inloggen met een wachtwoord werkt niet (meer) voor dit account. Log in met <strong>Microsoft (schoolaccount)</strong>, of vraag de beheerder om hulp.</p>
             ) : (
               <>
-                <p>Het account <strong>{gebruiker.email}</strong> staat niet in de lijst van het MOL-portaal.</p>
+                <p>Het account <strong>{gebruiker.email}</strong> staat niet in de lijst van het MOL-portaal, of heeft (nog) geen toegang.</p>
                 <p>Ben je leerling? Meld je bij je mentor. Ben je docent? Meld je bij de beheerder.</p>
               </>
             )}
