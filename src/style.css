@@ -113,6 +113,11 @@ code.code { font-size: 1.05rem; letter-spacing: .08em; font-weight: 600; }
 .slot-icoon { margin-left: 8px; }
 .slot-label { margin-left: 8px; }
 .chip select.cap { width: auto; margin: 0 2px 0 6px; padding: 0 4px; font-size: .85rem; border: 0; background: transparent; }
+/* Duo-mentoraat: tijden per mentor naast elkaar (op telefoon onder elkaar) */
+.mentor-keuze { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 0 16px; align-items: start; }
+.mentor-keuze .slots { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
+.mijn-wachtwoord { margin-top: 24px; text-align: center; }
+.mijn-wachtwoord .kaart { text-align: left; }
 .info-bericht { margin-top: 10px; }
 .info-bericht + .info-bericht { border-top: 1px solid var(--rand); padding-top: 10px; }
 .info-bericht p { margin: 0 0 4px; }

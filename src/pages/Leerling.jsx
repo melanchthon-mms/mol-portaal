@@ -135,13 +135,13 @@ function Ronde({ ronde, kijk }) {
 
       {!!metInfo.length && (
         <div className="kaart info">
-          <strong>Informatie van {metInfo.length > 1 ? 'de mentoren' : 'de mentor'}</strong>
+          <strong>Informatie van {deMentor}</strong>
           {metInfo.map((m) => (
             <div key={m.docent_id} className="info-bericht">
               <p className="witregels">{m.info}</p>
-              <p className="zacht klein">{m.naam}</p>
             </div>
           ))}
+          <p className="zacht klein">{mentoren.length > 1 ? 'Mentoren' : 'Mentor'}: {namen(mentoren.map((m) => m.naam))}</p>
         </div>
       )}
 
@@ -174,7 +174,7 @@ function Ronde({ ronde, kijk }) {
         </div>
       )}
 
-      {open && (!eigen || verplaats) && perMentor.map((m) => (
+      {open && (!eigen || verplaats) && <div className="mentor-keuze">{perMentor.map((m) => (
         <div key={m.docent_id} className="kaart">
           <h3>{eigen ? 'Ander moment kiezen' : 'Kies een moment'} · {m.naam}</h3>
           {m.vol && <p className="zacht">Deze mentor is vol. Kies een andere mentor.</p>}
@@ -194,13 +194,16 @@ function Ronde({ ronde, kijk }) {
             </div>
           ))}
         </div>
-      ))}
+      ))}</div>}
       {kijk && kanNiet && <p className="opmerking let">Leerling gaf door dat geen moment past: “{kanNiet.reden}”{kanNiet.voorkeur ? ` · kan wel: ${kanNiet.voorkeur}` : ''}</p>}
       {open && !eigen && !kijk && !!mentoren.length && <KanNiet ronde={ronde} kanNiet={kanNiet} klaar={laad} />}
       {!mentoren.length && <p className="zacht">Er is nog geen mentor aan deze klas gekoppeld.</p>}
     </section>
   )
 }
+
+// "A", "A en B", "A, B en C"
+const namen = (l) => (l.length < 2 ? l.join('') : `${l.slice(0, -1).join(', ')} en ${l[l.length - 1]}`)
 
 function KanNiet({ ronde, kanNiet, klaar }) {
   const [open, setOpen] = useState(false)

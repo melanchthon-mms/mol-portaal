@@ -4,6 +4,7 @@ import { dag, dagKey, dagTijd, datumLabel, hhmm, perDag, tijd } from '../lib/fmt
 import { download, maakCsv, maakIcs } from '../lib/files.js'
 import { KopieerKnop, Laden, LeerlingLijst, Statistiek, Tabs, useActie, bevestig, bevestigTyp } from '../components/ui.jsx'
 import { SCHOOL } from '../config.js'
+import { WachtwoordWijzigen } from './Login.jsx'
 
 export default function Mentor({ docent }) {
   const [rondes, setRondes] = useState(null)
@@ -39,7 +40,24 @@ export default function Mentor({ docent }) {
           {ronde && <MentorRonde key={ronde.id + tab} tab={tab} ronde={ronde} docent={docent} />}
         </>
       )}
+      {!docent.is_admin && <MijnWachtwoord />}
     </>
+  )
+}
+
+// Ingelogd met e-mail + wachtwoord? Dan kan de medewerker het tijdelijke wachtwoord hier zelf wijzigen
+function MijnWachtwoord() {
+  const [metWachtwoord, setMetWachtwoord] = useState(false)
+  const [open, setOpen] = useState(false)
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setMetWachtwoord((data.user?.app_metadata?.providers || []).includes('email')))
+  }, [])
+  if (!metWachtwoord) return null
+  return (
+    <div className="mijn-wachtwoord">
+      {!open && <button className="link" onClick={() => setOpen(true)}>Mijn wachtwoord wijzigen</button>}
+      {open && <WachtwoordWijzigen />}
+    </div>
   )
 }
 

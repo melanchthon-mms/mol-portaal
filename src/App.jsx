@@ -30,9 +30,9 @@ export default function App() {
         if (!email) { setGebruiker({ type: 'anoniem' }); return }
       }
       const { data: d } = await supabase.from('docenten').select('*').eq('email', email).maybeSingle()
-      // Wachtwoord-accounts zijn alleen voor beheerders; anderen loggen in met Microsoft
+      // Wachtwoord-accounts: alleen medewerkers uit de lijst zonder SSO-vinkje (de database controleert dit ook)
       const alleenWachtwoord = !sessie.user.is_anonymous && (sessie.user.app_metadata?.providers || []).every((p) => p === 'email')
-      if (alleenWachtwoord && !d?.is_admin) { setGebruiker({ type: 'onbekend', email, wachtwoord: true }); return }
+      if (alleenWachtwoord && (!d || (d.sso && !d.is_admin))) { setGebruiker({ type: 'onbekend', email, wachtwoord: true }); return }
       if (d) { setGebruiker({ type: 'docent', ...d }); setWeergave(d.is_admin ? 'beheer' : 'mentor'); return }
       const { data: l } = await supabase.from('leerlingen').select('*').eq('email', email).maybeSingle()
       if (l) { setGebruiker({ type: 'leerling', ...l }); return }
@@ -70,7 +70,7 @@ export default function App() {
           <div className="kaart">
             <h1>Geen toegang</h1>
             {gebruiker.wachtwoord ? (
-              <p>Inloggen met een wachtwoord kan alleen voor beheerders. Log in met <strong>Microsoft (schoolaccount)</strong>.</p>
+              <p>Inloggen met een wachtwoord werkt niet (meer) voor dit account. Log in met <strong>Microsoft (schoolaccount)</strong>, of vraag de beheerder om hulp.</p>
             ) : (
               <>
                 <p>Het account <strong>{gebruiker.email}</strong> staat niet in de lijst van het MOL-portaal.</p>

@@ -5,7 +5,7 @@ import { Melding } from '../components/ui.jsx'
 export default function Login({ klaar }) {
   const [fout, setFout] = useState('')
   const [anders, setAnders] = useState(false) // "Andere manier van inloggen" open?
-  const [keuze, setKeuze] = useState('code') // 'code' | 'beheer'
+  const [keuze, setKeuze] = useState('leerling') // 'leerling' | 'medewerker'
 
   async function microsoft() {
     setFout('')
@@ -29,10 +29,10 @@ export default function Login({ klaar }) {
       {anders && (
         <div className="anders">
           <div className="segment">
-            <button className={keuze === 'code' ? 'actief' : ''} onClick={() => setKeuze('code')}>Inlogcode</button>
-            <button className={keuze === 'beheer' ? 'actief' : ''} onClick={() => setKeuze('beheer')}>Beheerder</button>
+            <button className={keuze === 'leerling' ? 'actief' : ''} onClick={() => setKeuze('leerling')}>Leerlingen</button>
+            <button className={keuze === 'medewerker' ? 'actief' : ''} onClick={() => setKeuze('medewerker')}>Medewerkers</button>
           </div>
-          {keuze === 'code' ? <CodeLogin klaar={klaar} /> : <BeheerLogin />}
+          {keuze === 'leerling' ? <CodeLogin klaar={klaar} /> : <MedewerkerLogin />}
         </div>
       )}
     </div>
@@ -69,7 +69,7 @@ function CodeLogin({ klaar }) {
 
   return (
     <form onSubmit={inloggen}>
-      <p className="zacht klein">Voor leerlingen en docenten die nog niet met hun schoolaccount kunnen inloggen. Leerlingen krijgen de code van hun mentor, docenten van de beheerder.</p>
+      <p className="zacht klein">Voor leerlingen die nog niet met hun schoolaccount kunnen inloggen. De inlogcode krijg je van je mentor.</p>
       <label>Inlogcode<input autoFocus value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Bijv. K7QM-3XRT"
         autoComplete="off" autoCapitalize="characters" spellCheck={false} required minLength={8} maxLength={12} /></label>
       <Melding type="fout">{fout}</Melding>
@@ -78,9 +78,9 @@ function CodeLogin({ klaar }) {
   )
 }
 
-// Reserve-inlog met e-mail en wachtwoord, alleen voor beheerders.
+// Medewerkers: e-mail + (tijdelijk) wachtwoord van de beheerder, zolang SSO bij hen uit staat.
 // Geen mail-links: de linkcontrole van Outlook gebruikt eenmalige links al op.
-function BeheerLogin() {
+function MedewerkerLogin() {
   const [email, setEmail] = useState('')
   const [ww, setWw] = useState('')
   const [bericht, setBericht] = useState(null)
@@ -97,7 +97,7 @@ function BeheerLogin() {
 
   return (
     <form onSubmit={inloggen}>
-      <p className="zacht klein">Alleen voor beheerders van het portaal.</p>
+      <p className="zacht klein">Log in met je school-e-mailadres en het wachtwoord dat je van de beheerder hebt gekregen.</p>
       <label>E-mail<input autoFocus type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
       <label>Wachtwoord<input type="password" autoComplete="current-password" value={ww} onChange={(e) => setWw(e.target.value)} required /></label>
       {bericht && <Melding type={bericht.type}>{bericht.tekst}</Melding>}
@@ -107,7 +107,7 @@ function BeheerLogin() {
   )
 }
 
-// Eigen wachtwoord wijzigen (ingelogde beheerder, bij Beheer → Meer)
+// Eigen wachtwoord wijzigen (beheerder bij Beheer → Meer, medewerker onderaan de mentorpagina)
 export function WachtwoordWijzigen() {
   const [ww, setWw] = useState('')
   const [ww2, setWw2] = useState('')
