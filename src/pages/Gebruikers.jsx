@@ -332,29 +332,33 @@ function Docenten({ d, laad, zelf }) {
             <div>
               <strong>{x.naam}</strong> {x.weergavenaam && <span className="zacht">({x.weergavenaam})</span>} {x.is_admin && <span className="label">beheerder</span>}
               {x.toegang === false && !x.is_admin && <span className="label open">geen toegang</span>}
-              <div className="zacht klein">{x.email}{klassenVan(x.id).length ? ` · mentor ${klassenVan(x.id).join(', ')}` : ''}
-                {!x.is_admin && heeftWw(x) && <span className="label ww-label">wachtwoord</span>}</div>
+              <div className="zacht klein">{x.email}{klassenVan(x.id).length ? ` · mentor ${klassenVan(x.id).join(', ')}` : ''}</div>
             </div>
-            <div className="rij-acties">
-              {!x.is_admin && heeftWw(x) && <button className="link" disabled={bezig} onClick={() => wisWachtwoord(x)}>Wachtwoord wissen</button>}
-              {!x.is_admin && !x.sso && (
-                <button className="link" disabled={bezig} onClick={() => maakWachtwoorden([x])}
-                  title={heeftWw(x) ? 'Een nieuw tijdelijk wachtwoord vervangt het huidige' : 'Nog geen wachtwoord'}>
-                  {heeftWw(x) ? 'Nieuw wachtwoord' : 'Wachtwoord maken'}
-                </button>
-              )}
-              {!x.is_admin && (
+            {/* Vaste kolommen zodat alle rijen netjes onder elkaar staan; WW = wachtwoord */}
+            <div className="docent-acties">
+              <span className="ww-cel">
+                {!x.is_admin && !x.sso && (
+                  <button className="link" disabled={bezig} onClick={() => maakWachtwoorden([x])}
+                    title={heeftWw(x) ? 'Nieuw tijdelijk wachtwoord; het huidige vervalt' : 'Tijdelijk wachtwoord maken'}>
+                    {heeftWw(x) ? 'Nieuw WW' : 'WW maken'}
+                  </button>
+                )}
+                {!x.is_admin && heeftWw(x) && (
+                  <button className="link" disabled={bezig} onClick={() => wisWachtwoord(x)} title="Wachtwoord verwijderen">WW wissen</button>
+                )}
+              </span>
+              <span>{!x.is_admin && (
                 <label className="sso-vink" title="Aan = alleen inloggen met Microsoft; het wachtwoord werkt niet meer">
                   <input type="checkbox" checked={!!x.sso} disabled={bezig} onChange={(e) => zetSso([x.id], e.target.checked)} /> SSO
                 </label>
-              )}
-              {!x.is_admin && (
+              )}</span>
+              <span>{!x.is_admin && (
                 <label className="sso-vink" title="Uit = kan op geen enkele manier inloggen; het wachtwoord blijft bewaard">
                   <input type="checkbox" checked={x.toegang !== false} disabled={bezig} onChange={(e) => zetToegang(x, e.target.checked)} /> Toegang
                 </label>
-              )}
+              )}</span>
               <button className="link" onClick={() => setBewerk({ id: x.id, naam: x.naam, email: x.email, weergavenaam: x.weergavenaam || '' })}>Wijzigen</button>
-              {x.id !== zelf.id && <button className="link" disabled={bezig} onClick={() => verwijder(x)}>Verwijderen</button>}
+              <span>{x.id !== zelf.id && <button className="link" disabled={bezig} onClick={() => verwijder(x)}>Verwijderen</button>}</span>
             </div>
           </li>
         ))}

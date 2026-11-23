@@ -117,10 +117,14 @@ code.code { font-size: 1.05rem; letter-spacing: .08em; font-weight: 600; }
 .mentor-keuze { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 0 16px; align-items: start; }
 .mentor-keuze .slots { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
 .mijn-wachtwoord { margin-top: 24px; text-align: center; }
-.ww-label { font-size: .7rem; padding: 1px 8px; margin-left: 6px; vertical-align: 1px; }
-/* Docentenlijst: naam/e-mail krijgt ruimte, knoppen lopen zo nodig door naar een tweede regel */
-.lijst li > div:first-child { min-width: 200px; flex: 1; }
-.lijst li .rij-acties { flex-shrink: 1; flex-wrap: wrap; justify-content: flex-end; row-gap: 2px; }
+/* Docentenlijst: vaste kolommen (WW · SSO · Toegang · Wijzigen · Verwijderen) */
+.docent-acties { display: grid; grid-template-columns: 190px 64px 94px auto 100px; align-items: center; column-gap: 6px; flex-shrink: 0; }
+.docent-acties .ww-cel { display: flex; gap: 10px; white-space: nowrap; }
+.docent-acties button.link { white-space: nowrap; }
+@media (max-width: 760px) {
+  .lijst li:has(.docent-acties) { flex-wrap: wrap; }
+  .docent-acties { grid-template-columns: auto auto auto auto auto; width: 100%; justify-content: start; }
+}
 .mijn-wachtwoord .kaart { text-align: left; }
 .info-bericht { margin-top: 10px; }
 .info-bericht + .info-bericht { border-top: 1px solid var(--rand); padding-top: 10px; }
