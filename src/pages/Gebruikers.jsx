@@ -314,10 +314,11 @@ function Docenten({ d, laad, zelf }) {
               <div className="zacht klein">{x.email}{klassenVan(x.id).length ? ` · mentor ${klassenVan(x.id).join(', ')}` : ''}</div>
             </div>
             <div className="rij-acties">
+              {!x.is_admin && !x.sso && heeftWw(x) && <span className="zacht klein">heeft wachtwoord</span>}
               {!x.is_admin && !x.sso && (
                 <button className="link" disabled={bezig} onClick={() => maakWachtwoorden([x])}
-                  title={heeftWw(x) ? 'Heeft al een wachtwoord; een nieuw tijdelijk wachtwoord vervangt het' : 'Nog geen wachtwoord'}>
-                  {heeftWw(x) ? '🔒 Nieuw wachtwoord' : 'Wachtwoord maken'}
+                  title={heeftWw(x) ? 'Een nieuw tijdelijk wachtwoord vervangt het huidige' : 'Nog geen wachtwoord'}>
+                  {heeftWw(x) ? 'Nieuw wachtwoord' : 'Wachtwoord maken'}
                 </button>
               )}
               {!x.is_admin && (
