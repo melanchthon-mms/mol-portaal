@@ -250,6 +250,16 @@ function Docenten({ d, laad, zelf }) {
     }, `SSO ${aan ? 'aan' : 'uit'} voor ${ids.length} docent${ids.length === 1 ? '' : 'en'}.`)
   }
 
+  // Wachtwoord echt verwijderen (supabase/wachtwoord-wissen.sql); docent wordt ook uitgelogd
+  async function wisWachtwoord(x) {
+    if (!await bevestig(`Wachtwoord van ${x.naam} wissen? Inloggen met e-mail en wachtwoord werkt dan niet meer en ${x.naam} wordt uitgelogd. Later kun je een nieuw wachtwoord maken.`, { knop: 'Wachtwoord wissen', gevaar: true })) return
+    await voer(async () => {
+      const { error } = await supabase.rpc('beheer_wis_wachtwoord', { p_docent: x.id })
+      if (error) throw error
+      await laad()
+    }, `Wachtwoord van ${x.naam} is gewist.`)
+  }
+
   // Toegang uit = docent kan op geen enkele manier inloggen (zie supabase/docent-toegang.sql); wachtwoord blijft bewaard
   async function zetToegang(x, aan) {
     if (!aan && !await bevestig(`${x.naam} kan dan niet meer inloggen (ook niet met Microsoft). Het wachtwoord blijft bewaard; zet het vinkje weer aan om toegang terug te geven.`, { knop: 'Toegang uitzetten' })) return
@@ -325,7 +335,8 @@ function Docenten({ d, laad, zelf }) {
               <div className="zacht klein">{x.email}{klassenVan(x.id).length ? ` · mentor ${klassenVan(x.id).join(', ')}` : ''}</div>
             </div>
             <div className="rij-acties">
-              {!x.is_admin && !x.sso && heeftWw(x) && <span className="zacht klein">heeft wachtwoord</span>}
+              {!x.is_admin && heeftWw(x) && <span className="zacht klein">heeft wachtwoord</span>}
+              {!x.is_admin && heeftWw(x) && <button className="link" disabled={bezig} onClick={() => wisWachtwoord(x)}>Wachtwoord wissen</button>}
               {!x.is_admin && !x.sso && (
                 <button className="link" disabled={bezig} onClick={() => maakWachtwoorden([x])}
                   title={heeftWw(x) ? 'Een nieuw tijdelijk wachtwoord vervangt het huidige' : 'Nog geen wachtwoord'}>
