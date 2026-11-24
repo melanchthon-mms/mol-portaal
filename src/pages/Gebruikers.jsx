@@ -169,6 +169,7 @@ function Docenten({ d, laad, zelf }) {
   const { bezig, voer, melding } = useActie()
   const [zoek, setZoek] = useState('')
   const [bewerk, setBewerk] = useState(null) // { id, naam, email }
+  const [open, setOpen] = useState(null) // docent waarvan het Beheren-paneel open staat
   const [nieuw, setNieuw] = useState({ naam: '', email: '' })
   const klassenVan = (id) => d.km.filter((x) => x.docent_id === id).map((x) => x.klas).sort()
   const lijst = d.docenten.filter((x) => !zoek || `${x.naam} ${x.email} ${klassenVan(x.id).join(' ')}`.toLowerCase().includes(zoek.toLowerCase()))
@@ -328,38 +329,57 @@ function Docenten({ d, laad, zelf }) {
             </form>
           </li>
         ) : (
-          <li key={x.id}>
-            <div>
-              <strong>{x.naam}</strong> {x.weergavenaam && <span className="zacht">({x.weergavenaam})</span>} {x.is_admin && <span className="label">beheerder</span>}
-              {x.toegang === false && !x.is_admin && <span className="label open">geen toegang</span>}
+          <li key={x.id} className="docent-rij">
+            <div className="docent-info">
+              <strong>{x.naam}</strong> {x.weergavenaam && <span className="zacht">({x.weergavenaam})</span>}
               <div className="zacht klein">{x.email}{klassenVan(x.id).length ? ` · mentor ${klassenVan(x.id).join(', ')}` : ''}</div>
             </div>
-            {/* Vaste kolommen zodat alle rijen netjes onder elkaar staan; WW = wachtwoord */}
-            <div className="docent-acties">
-              <span className="ww-cel">
-                {!x.is_admin && !x.sso && (
-                  <button className="link" disabled={bezig} onClick={() => maakWachtwoorden([x])}
-                    title={heeftWw(x) ? 'Nieuw tijdelijk wachtwoord; het huidige vervalt' : 'Tijdelijk wachtwoord maken'}>
-                    {heeftWw(x) ? 'Nieuw WW' : 'WW maken'}
-                  </button>
-                )}
-                {!x.is_admin && heeftWw(x) && (
-                  <button className="link" disabled={bezig} onClick={() => wisWachtwoord(x)} title="Wachtwoord verwijderen">WW wissen</button>
-                )}
-              </span>
-              <span>{!x.is_admin && (
-                <label className="sso-vink" title="Aan = alleen inloggen met Microsoft; het wachtwoord werkt niet meer">
-                  <input type="checkbox" checked={!!x.sso} disabled={bezig} onChange={(e) => zetSso([x.id], e.target.checked)} /> SSO
-                </label>
-              )}</span>
-              <span>{!x.is_admin && (
-                <label className="sso-vink" title="Uit = kan op geen enkele manier inloggen; het wachtwoord blijft bewaard">
-                  <input type="checkbox" checked={x.toegang !== false} disabled={bezig} onChange={(e) => zetToegang(x, e.target.checked)} /> Toegang
-                </label>
-              )}</span>
-              <button className="link" onClick={() => setBewerk({ id: x.id, naam: x.naam, email: x.email, weergavenaam: x.weergavenaam || '' })}>Wijzigen</button>
-              <span>{x.id !== zelf.id && <button className="link" disabled={bezig} onClick={() => verwijder(x)}>Verwijderen</button>}</span>
+            {/* Alleen de stand in beeld; acties zitten achter "Beheren" (WW = wachtwoord) */}
+            <div className="docent-stand">
+              {x.is_admin ? <span className="label">beheerder</span> : (
+                <>
+                  {x.toegang === false && <span className="badge rood">Geen toegang</span>}
+                  {x.sso ? <span className="badge">SSO</span>
+                    : heeftWw(x) ? <span className="badge groen" title="Heeft een wachtwoord">WW ✓</span>
+                    : <span className="badge leeg" title="Nog geen wachtwoord">WW –</span>}
+                </>
+              )}
+              <button className="secundair klein-knop" aria-expanded={open === x.id} onClick={() => setOpen(open === x.id ? null : x.id)}>
+                Beheren {open === x.id ? '▴' : '▾'}
+              </button>
             </div>
+            {open === x.id && (
+              <div className="docent-paneel">
+                {!x.is_admin && (
+                  <>
+                    <div className="paneel-groep">
+                      <span className="paneel-kop">Wachtwoord</span>
+                      {x.sso ? <span className="zacht klein">Uit door SSO (alleen Microsoft)</span> : (
+                        <button className="secundair klein-knop" disabled={bezig} onClick={() => maakWachtwoorden([x])}
+                          title={heeftWw(x) ? 'Nieuw tijdelijk wachtwoord; het huidige vervalt' : 'Tijdelijk wachtwoord maken'}>
+                          {heeftWw(x) ? 'Nieuw WW' : 'WW maken'}
+                        </button>
+                      )}
+                      {heeftWw(x) && <button className="secundair klein-knop rood" disabled={bezig} onClick={() => wisWachtwoord(x)}>WW wissen</button>}
+                    </div>
+                    <div className="paneel-groep">
+                      <span className="paneel-kop">Inloggen</span>
+                      <label className="sso-vink" title="Aan = alleen inloggen met Microsoft; het wachtwoord werkt niet meer">
+                        <input type="checkbox" checked={!!x.sso} disabled={bezig} onChange={(e) => zetSso([x.id], e.target.checked)} /> Alleen Microsoft (SSO)
+                      </label>
+                      <label className="sso-vink" title="Uit = kan op geen enkele manier inloggen; het wachtwoord blijft bewaard">
+                        <input type="checkbox" checked={x.toegang !== false} disabled={bezig} onChange={(e) => zetToegang(x, e.target.checked)} /> Toegang
+                      </label>
+                    </div>
+                  </>
+                )}
+                <div className="paneel-groep">
+                  <span className="paneel-kop">Docent</span>
+                  <button className="secundair klein-knop" onClick={() => { setOpen(null); setBewerk({ id: x.id, naam: x.naam, email: x.email, weergavenaam: x.weergavenaam || '' }) }}>Wijzigen</button>
+                  {x.id !== zelf.id && <button className="secundair klein-knop rood" disabled={bezig} onClick={() => verwijder(x)}>Verwijderen</button>}
+                </div>
+              </div>
+            )}
           </li>
         ))}
         {!lijst.length && <li className="zacht">Geen docenten gevonden.</li>}
